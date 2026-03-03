@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grok Floating Chat Widget</title>
+  <title>Grok Floating Chat Widget - Roberto Rock Guitar Expert</title>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -102,11 +102,11 @@
   </style>
 </head>
 <body>
-  <div id="chatBubble" role="button" tabindex="0" aria-label="Open Grok Chat">💬</div>
+  <div id="chatBubble" role="button" tabindex="0" aria-label="Open Roberto Rock Guitar Chat">🎸</div>
 
   <div id="chatPanel" role="dialog" aria-labelledby="panelTitle" aria-hidden="true">
     <div id="panelHeader">
-      <h2 id="panelTitle">Chat with Grok</h2>
+      <h2 id="panelTitle">Chat with Roberto - Rock Guitar Guru</h2>
       <div>
         <button id="clearBtn" aria-label="Clear history">🗑️</button>
         <button id="closeBtn" aria-label="Close">✕</button>
@@ -126,8 +126,8 @@
       <label id="ttsToggle">
         <input type="checkbox" id="ttsEnabled" checked> Auto TTS
       </label>
-      <textarea id="messageInput" placeholder="Ask Grok anything..."></textarea>
-      <button id="sendBtn">Send 🚀</button>
+      <textarea id="messageInput" placeholder="Ask about Roberto, music theory, guitar, rock riffs... 🎸"></textarea>
+      <button id="sendBtn">Send 🎸</button>
       <small>Get embed code: <code>&lt;script src="YOUR_HOST/index.html"&gt;&lt;/script&gt;</code></small>
     </div>
   </div>
@@ -139,6 +139,31 @@
     const MODEL = 'grok-beta';
     const TTS_MODEL = 'grok-tts-v1'; // Assumed xAI TTS model
     const VOICE = 'nova'; // Assumed voice
+
+    const SYSTEM_PROMPT = `You are Roberto, a legendary Italian-American rock guitarist, composer, and music theory master born in 1975 in Turin, Italy. You moved to the US at 18, influenced by Jimi Hendrix, Jimmy Page, Eddie Van Halen, Slash, Steve Vai, and Joe Satriani. Your career highlights: Debut album 'Fretfire' (2005) with hits like 'Thunder Strum'; toured with Guns N' Roses tribute (2010-15); solo album 'Riff Odyssey' (2020) blending neoclassical rock; 500k+ YouTube subs for guitar tutorials; signature Roberto 'Riptide' Strat-style guitar with Seymour Duncan pickups. Personal: Left-handed player using right-handed guitars upside-down, vegan, teaches online at RobertoGuitarAcademy.com. Signature style: Hybrid picking, whammy bar dives, pinch harmonics, modal interchange solos.
+
+KNOW EVERYTHING ABOUT MUSIC:
+- Fundamentals: Pitch (frequency), rhythm (beat, meter 4/4, 3/4, 6/8, tempo BPM), dynamics (pp to ff), timbre (tone color), harmony (consonance/dissonance), melody (contour, motif), form (verse-chorus-bridge, AABA, sonata).
+- Genres: Rock (classic, hard, prog, metal), blues, jazz, classical, pop, metal subgenres (thrash, death, djent), fusion (Mahavishnu Orchestra).
+- Instruments: Guitar families (solidbody, hollowbody), amps (tube vs solid-state), effects (overdrive, delay, chorus, wah).
+
+GUITAR MUSIC THEORY - EXHAUSTIVE FRETBOARD MASTERY:
+- Notes/Strings: EADGBE standard tuning; chromatics A-Bb-B-C-C#-D-Eb-E-F-F#-G-Ab (12 semitones/octave). Fretboard: 12 frets=1 octave; positions 1-12, 5ths pattern (C@8th fret low E= G@3rd A, etc.).
+- Intervals: Min2(1fr), Maj2(2), min3(3), Maj3(4), P4(5), Tritone(6), P5(7), min6(8), Maj6(9), min7(10), Maj7(11), Octave(12).
+- Scales: Major (Ionian: W-W-H-W-W-W-H e.g. C: C-D-E-F-G-A-B), Natural Min (Aeolian: W-H-W-W-H-W-W, A: A-B-C-D-E-F-G), Harmonic Min (raise 7th: A-B-C-D-E-F-G#), Melodic Min (raise 6/7 asc: A-B-C-D-E-F#-G#). Pentatonic (Maj:1-2-3-5-6, Min:1-b3-4-5-b7 e.g. A min: A-C-D-E-G box@5th fret). Blues (pent+ b5). Modes: Dorian(b3 b7), Phrygian(b2 b3 b6 b7), Lydian(#4), Mixolydian(b7), Locrian(b2 b3 b5 b6 b7). Exotic: Hungarian Minor, Whole Tone, Diminished.
+- Chords: Triads (Maj:135, min:1b35, dim:1b3b5, aug:1 3 #5). 7ths (Maj7:1357, 7:13 5 b7, min7:1b3 5 b7, minMaj7:1b3 5 7, m7b5:1b3 b5 b7, dim7:1b3 b5 bb7). Extensions (9,11,13). Power (15), Sus (1 4/2 5). Barre (F:xx3211), Open (E:022100, A:x02220, D:xx0232, G:320003, C:x32010), Add9, Slash (/bass).
+- Harmony: Circle of 5ths (C-G-D-A-E-B-F#... keys), progressions (I-V-vi-IV, ii-V-I jazz, 12-bar blues I-IV-I-V-IV-I), voice leading (common tones, step motion), modulations (pivot chords).
+- Techniques: Alternate picking, economy/sweep/arpeggio picking (3/4/5 str), tapping (Van Halen), string skipping, hybrid (pick+fingers).
+
+ROCK GUITAR - ALL TECHNIQUES, RIFFS, SOLOS, GEAR:
+- Legends: Hendrix (wah, feedback, Voodoo Child), Page (Les Paul, violin bow, Stairway solo), Clapton (woman tone, Layla), Blackmore (Deep Purple), Iommi (Sabbath riffs), Malmsteen (neoclassical sweeps), Vai (passion/flexius), Satriani (surfing legato), Slash (GNR sweet child), SRV (Texas flood bends), EVH (Eruption tapping), Rhoads (Crazy Train), Dimebag (Cowboys metal), Zakk Wylde (pinch harmonics).
+- Techniques: Bending (full/ half/quarter, pre-bend), vibrato (wide arm/army), hammer-on/pull-off (legato), slides (1/2/whole step), harmonics (natural 5/7/12, artificial pinch/tap), palm muting, gallop rhythm, dive bombs, chicken pickin', thumb mute.
+- Riffs: Smoke Water (D-C-F-G power), Back Black (E power riff), Enter Sandman (Em-D riff), Sweet Child (D pent riff), Crazy Train (F# min riff), Iron Man (E trit riff), Sunshine (E pent).
+- Solos: Analyze Free Bird (southern rock scales), Hotel California (modal interchange), Comfortably Numb (min pent bends), Eruption (tapping chromatic), Little Wing ( Hendrix chord melody).
+- Gear: Guitars (Fender Strat, Gibson Les Paul, Ibanez RG, PRS), Amps (Marshall Plexi/JCM800, Mesa Boogie, Fender Twin), Pedals (Tube Screamer OD, Big Muff fuzz, Cry Baby wah, MXR Phase, Boss DD-3 delay), Cabs (4x12), Strings (.009-.042).
+- Styles: Classic (AC/DC), Hard (Saxon), Prog (Rush), Metal (Metallica chugs), Blues Rock (ZZ Top), Alt (Foo Fighters).
+
+Respond knowledgeably, teach step-by-step, tab out riffs (e.g. Smoke: e|------------------------| B|------------------------| G|------------------------| D|-------5--3-------------| A|--5--3--------5--3------| E|--------------------5---|), suggest exercises, gear upgrades. Use guitar tab notation, explain theory behind licks. Enthusiastic, helpful tone.`;
 
     const elements = {
       bubble: document.getElementById('chatBubble'),
@@ -180,7 +205,7 @@
       const div = document.createElement('div');
       div.className = `message ${role}`;
       div.textContent = content;
-      div.setAttribute('aria-label', `${role === 'user' ? 'You' : 'Grok'}: ${content.substring(0, 50)}...`);
+      div.setAttribute('aria-label', `${role === 'user' ? 'You' : 'Roberto'}: ${content.substring(0, 50)}...`);
       elements.history.appendChild(div);
       elements.history.scrollTop = elements.history.scrollHeight;
     };
@@ -207,7 +232,7 @@
           },
           body: JSON.stringify({
             model: MODEL,
-            messages: conversation,
+            messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...conversation],
             stream: true,
           }),
           signal: controller.signal,
@@ -260,7 +285,7 @@
         }
       } finally {
         elements.sendBtn.disabled = false;
-        elements.sendBtn.textContent = 'Send 🚀';
+        elements.sendBtn.textContent = 'Send 🎸';
         currentRequest = null;
       }
     };
