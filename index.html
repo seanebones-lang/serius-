@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grok Floating Chat Widget</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+    #chatBubble {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #7c3aed, #9333ea);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      z-index: 10000;
+      font-size: 24px;
+      color: white;
+    }
+    #chatBubble:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(124, 58, 237, 0.6); }
+
+    #chatPanel {
+      position: fixed;
+      bottom: -600px;
+      right: 20px;
+      width: 350px;
+      max-width: calc(100vw - 40px);
+      height: 500px;
+      background: white;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+      transition: bottom 0.3s ease-out;
+      z-index: 10001;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    #chatPanel.open { bottom: 20px; }
+
+    #panelHeader {
+      padding: 20px;
+      background: linear-gradient(135deg, #7c3aed, #9333ea);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #panelTitle { margin: 0; font-size: 18px; font-weight: 600; }
+    #closeBtn, #clearBtn { background: none; border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background 0.2s; }
+    #closeBtn:hover, #clearBtn:hover { background: rgba(255,255,255,0.2); }
+
+    #panelBody {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .message { padding: 12px 16px; border-radius: 18px; max-width: 90%; word-wrap: break-word; }
+    .user { align-self: flex-end; background: #7c3aed; color: white; }
+    .assistant { align-self: flex-start; background: #f1f5f9; color: #334155; }
+
+    #panelFooter {
+      padding: 20px;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    #apiKeySection { display: flex; flex-direction: column; gap: 8px; }
+    #apiKeyLabel { font-size: 14px; color: #64748b; font-weight: 500; }
+    #apiKeyInput { padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; }
+    #apiKeyInput:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    #messageInput { resize: none; padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; height: 80px; font-family: inherit; }
+    #messageInput:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    #sendBtn { padding: 12px 20px; background: linear-gradient(135deg, #7c3aed, #9333ea); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: transform 0.2s; }
+    #sendBtn:hover:not(:disabled) { transform: translateY(-1px); }
+    #sendBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+    #ttsToggle { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
+    #ttsToggle input { width: auto; }
+
+    #errorMsg { color: #ef4444; font-size: 14px; padding: 8px; background: #fef2f2; border-radius: 8px; display: none; }
+
+    @media (max-width: 480px) {
+      #chatPanel { right: 10px; width: calc(100vw - 20px); height: calc(100vh - 40px); border-radius: 20px; bottom: 10px; }
+      #chatPanel.open { bottom: 10px; }
+    }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .message { animation: fadeIn 0.3s; }
+  </style>
+</head>
+<body>
+  <div id="chatBubble" role="button" tabindex="0" aria-label="Open Grok Chat">💬</div>
+
+  <div id="chatPanel" role="dialog" aria-labelledby="panelTitle" aria-hidden="true">
+    <div id="panelHeader">
+      <h2 id="panelTitle">Chat with Grok</h2>
+      <div>
+        <button id="clearBtn" aria-label="Clear history">🗑️</button>
+        <button id="closeBtn" aria-label="Close">✕</button>
+      </div>
+    </div>
+
+    <div id="panelBody">
+      <div id="history"></div>
+      <div id="errorMsg"></div>
+    </div>
+
+    <div id="panelFooter">
+      <div id="apiKeySection">
+        <label id="apiKeyLabel" for="apiKeyInput">xAI API Key (get at console.x.ai)</label>
+        <input id="apiKeyInput" type="password" placeholder="xai-...">
+      </div>
+      <label id="ttsToggle">
+        <input type="checkbox" id="ttsEnabled" checked> Auto TTS
+      </label>
+      <textarea id="messageInput" placeholder="Ask Grok anything..."></textarea>
+      <button id="sendBtn">Send 🚀</button>
+      <small>Get embed code: <code>&lt;script src="YOUR_HOST/index.html"&gt;&lt;/script&gt;</code></small>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://api.x.ai/v1';
+    const CHAT_ENDPOINT = '/chat/completions';
+    const TTS_ENDPOINT = '/audio/speech';
+    const MODEL = 'grok-beta';
+    const TTS_MODEL = 'grok-tts-v1'; // Assumed xAI TTS model
+    const VOICE = 'nova'; // Assumed voice
+
+    const elements = {
+      bubble: document.getElementById('chatBubble'),
+      panel: document.getElementById('chatPanel'),
+      closeBtn: document.getElementById('closeBtn'),
+      clearBtn: document.getElementById('clearBtn'),
+      apiKeyInput: document.getElementById('apiKeyInput'),
+      messageInput: document.getElementById('messageInput'),
+      sendBtn: document.getElementById('sendBtn'),
+      history: document.getElementById('history'),
+      errorMsg: document.getElementById('errorMsg'),
+      ttsEnabled: document.getElementById('ttsEnabled'),
+    };
+
+    let conversation = [];
+    let currentRequest = null;
+
+    // Persist/load API key
+    const loadApiKey = () => {
+      const key = localStorage.getItem('grok_api_key');
+      if (key) elements.apiKeyInput.value = key;
+    };
+    const saveApiKey = () => {
+      const key = elements.apiKeyInput.value.trim();
+      if (key.startsWith('xai-')) {
+        localStorage.setItem('grok_api_key', key);
+      }
+    };
+    loadApiKey();
+
+    // UI Helpers
+    const showError = (msg) => {
+      elements.errorMsg.textContent = msg;
+      elements.errorMsg.style.display = 'block';
+      setTimeout(() => { elements.errorMsg.style.display = 'none'; }, 5000);
+    };
+    const addMessage = (role, content) => {
+      conversation.push({ role, content });
+      const div = document.createElement('div');
+      div.className = `message ${role}`;
+      div.textContent = content;
+      div.setAttribute('aria-label', `${role === 'user' ? 'You' : 'Grok'}: ${content.substring(0, 50)}...`);
+      elements.history.appendChild(div);
+      elements.history.scrollTop = elements.history.scrollHeight;
+    };
+    const clearHistory = () => {
+      elements.history.innerHTML = '';
+      conversation = [];
+    };
+
+    // Stream chat response
+    const streamChat = async (apiKey, message) => {
+      const controller = new AbortController();
+      currentRequest = controller;
+
+      addMessage('user', message);
+      elements.sendBtn.disabled = true;
+      elements.sendBtn.textContent = 'Sending...';
+
+      try {
+        const response = await fetch(`${API_BASE}${CHAT_ENDPOINT}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            messages: conversation,
+            stream: true,
+          }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          const err = await response.text();
+          throw new Error(`API error ${response.status}: ${err}`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let assistantMsg = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(data);
+                const delta = parsed.choices[0]?.delta?.content;
+                if (delta) {
+                  assistantMsg += delta;
+                  // Update live (optimistic append)
+                  let msgEl = elements.history.lastElementChild;
+                  if (msgEl && msgEl.classList.contains('assistant')) {
+                    msgEl.textContent += delta;
+                  }
+                }
+              } catch (e) {}
+            }
+          }
+        }
+
+        if (assistantMsg) {
+          addMessage('assistant', assistantMsg);
+          if (elements.ttsEnabled.checked) {
+            await playTTS(apiKey, assistantMsg);
+          }
+        }
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          showError(err.message.includes('401') ? 'Invalid API key. Get one at console.x.ai' : err.message);
+          addMessage('assistant', '[Error: ' + err.message + ']');
+        }
+      } finally {
+        elements.sendBtn.disabled = false;
+        elements.sendBtn.textContent = 'Send 🚀';
+        currentRequest = null;
+      }
+    };
+
+    // Play TTS
+    const playTTS = async (apiKey, text) => {
+      try {
+        const response = await fetch(`${API_BASE}${TTS_ENDPOINT}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: TTS_MODEL,
+            input: text.slice(0, 2000), // Limit length
+            voice: VOICE,
+          }),
+        });
+
+        if (!response.ok) throw new Error(`TTS error: ${response.status}`);
+
+        const audioBlob = await response.blob();
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        audio.play().catch(e => console.warn('TTS play failed:', e));
+        audio.onended = () => URL.revokeObjectURL(audioUrl);
+      } catch (err) {
+        console.warn('TTS failed:', err);
+      }
+    };
+
+    // Event listeners
+    elements.bubble.addEventListener('click', () => {
+      elements.panel.classList.toggle('open');
+      elements.panel.setAttribute('aria-hidden', elements.panel.classList.contains('open') ? 'false' : 'true');
+    });
+    elements.bubble.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') elements.bubble.click();
+    });
+
+    elements.closeBtn.addEventListener('click', () => {
+      elements.panel.classList.remove('open');
+      elements.panel.setAttribute('aria-hidden', 'true');
+    });
+
+    elements.clearBtn.addEventListener('click', clearHistory);
+
+    elements.sendBtn.addEventListener('click', async () => {
+      const apiKey = elements.apiKeyInput.value.trim();
+      const message = elements.messageInput.value.trim();
+      if (!apiKey || !message) {
+        showError('Enter API key and message');
+        return;
+      }
+      if (!apiKey.startsWith('xai-')) {
+        showError('API key must start with xai-');
+        return;
+      }
+      saveApiKey();
+      elements.messageInput.value = '';
+      await streamChat(apiKey, message);
+    });
+
+    elements.messageInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && e.ctrlKey) {
+        elements.sendBtn.click();
+      }
+    });
+
+    // Abort on close
+    elements.closeBtn.addEventListener('click', () => {
+      if (currentRequest) currentRequest.abort();
+    });
+  </script>
+</body>
+</html>
